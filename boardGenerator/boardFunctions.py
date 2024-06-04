@@ -16,7 +16,7 @@ def naive_gen_board(size: int, number_of_mines: int, first_click: tuple) -> list
 						board[x][y] = 9
 						for dx in [-1, 0, 1]:
 								for dy in [-1, 0, 1]:
-										if 0 <= x + dx < size and 0 <= y + dy < size and board[x + dx][y + dy] != -1:
+										if 0 <= x + dx < size and 0 <= y + dy < size and board[x + dx][y + dy] != -1 and board[x + dx][y + dy] != 9:
 												board[x + dx][y + dy] += 1
 		return board
 
@@ -29,7 +29,7 @@ def draw_ascii_board(board: list) -> None:
 						print("|", end="")
 						if cell == 9:
 								print("X", end="")
-						if cell == -1:
+						elif cell == -1:
 								print("H", end="")
 						else:
 								print(cell, end="")
@@ -59,12 +59,13 @@ def uncoverFields(current_board, full_board, x, y) -> list:
 										uncoverFields(current_board, full_board, x + dx, y + dy)
 				return current_board
 
-def saveForMinizinc(board, size, click):
+def saveForMinizinc(board, size, number_of_mines) -> None:
 		"""
 		Save the board to a data file for Minizinc to run
 		"""
-		with open("./minizinc/data/data_gen.dzn", "w") as f:
+		with open("../superSaperSolver/data/data_gen.dzn", "w") as f:
 				f.write("size = {};\n".format(size))
+				f.write("mines_count = {};\n".format(number_of_mines))
 				f.write("fields = array2d(1..size, 1..size, [")
 				for row in board:
 						for cell in row:

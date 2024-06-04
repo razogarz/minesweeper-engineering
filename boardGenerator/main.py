@@ -1,11 +1,11 @@
-from pythonScripts.boardFunctions import *
+from boardGenerator.boardFunctions import *
 
 def main():
 		"""
 		Generate a naive board with mines
 		"""
-		size = 10
-		number_of_mines = 15
+		size = 15
+		number_of_mines = 25
 		first_click = (4, 5)
 
 		while True:
@@ -19,9 +19,8 @@ def main():
 		print("\n")
 		draw_ascii_board(covered_board)
 		print(covered_board)
+		saveForMinizinc(covered_board, size, number_of_mines)
 
-		saveForMinizinc(covered_board, size, first_click)
-		
-	
+
 if __name__ == "__main__":
 		main()
