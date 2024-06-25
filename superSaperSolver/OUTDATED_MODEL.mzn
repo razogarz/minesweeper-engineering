@@ -77,8 +77,6 @@ constraint forall (i, j in 1..size) (
   endif
 );
 
-
-
 % MATCH FIELDS TO KNOWN BOARD STATE
 constraint forall (i, j in 1..size) (
   if fields[i,j] != -1 then
@@ -88,17 +86,17 @@ constraint forall (i, j in 1..size) (
 
 % SUM OF DIFFERENT FIELDS MORE THAN 0
 constraint 0 < sum(
-  [bool2int(potential_board_neg[i,j] == fields[i,j]) | i, j in 1..size]
+  [potential_board_neg[i,j] == fields[i,j] | i, j in 1..size]
 );
 
 % CLICK HAS UNCOVERED FIELD AROUND
-% constraint 0 < sum(
-%   [bool2int(fields[x-i,y-j] != -1) | i, j in -1..1 
-%     where (i != 0 \/ j != 0) /\ 
-%            (x-i >= 1 /\ x-i <= size) /\
-%            (y-j >= 1 /\ y-j <= size)
-%     ]
-% );
+constraint 0 < sum(
+  [fields[x-i,y-j] != -1 | i, j in -1..1 
+    where (i != 0 \/ j != 0) /\ 
+           (x-i >= 1 /\ x-i <= size) /\
+           (y-j >= 1 /\ y-j <= size)
+    ]
+);
 
 
 solve satisfy;

@@ -71,4 +71,6 @@ def saveForMinizinc(board, size, number_of_mines) -> None:
 						for cell in row:
 								f.write(str(cell) + ",")
 				f.write("]);\n")
+				f.write("x = 0;\n")
+				f.write("y = 0;\n")
 		return None
