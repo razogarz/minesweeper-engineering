@@ -48,7 +48,7 @@ def main():
                 if x < GRID_SIZE or y < GRID_SIZE*2:
                     continue
 
-                row, col = (y // GRID_SIZE)-2, (x // GRID_SIZE)-1
+                row, col = (y // GRID_SIZE) - 1, (x // GRID_SIZE) - 1
 
                 # ---------------- FIRST CLICK ----------------
                 if first_click:
@@ -70,10 +70,10 @@ def main():
                             running = False
                         else:
                             board_to_save = convert_to_save(grid, revealed, flagged)
-                            draw_ascii_board(board_to_save)
+                            # draw_ascii_board(board_to_save)
                             saveForMinizinc(board_to_save, ROWS, NUM_MINES)
                             hint_cache_board = correct_hinted(board_to_save, hint_cache_board)
-                            hint(hint_cache_board)
+                            hint_cache_board = hint(hint_cache_board)
 
 
                 # ---------------- RIGHT CLICK ----------------
@@ -83,7 +83,7 @@ def main():
 
         # ----------------- DRAW GRID -----------------
         if grid:
-            draw_grid(grid, revealed, flagged, screen, font, flag_font)
+            draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board)
         pygame.display.flip()
 
 

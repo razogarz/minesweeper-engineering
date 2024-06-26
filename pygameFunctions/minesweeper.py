@@ -24,41 +24,14 @@ def create_grid(size: int, number_of_mines: int, first_click: tuple) -> list:
     return board
 
 
-def draw_grid(grid, revealed, flagged, screen, font, flag_font):
+def draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board):
     """
     Draw the minesweeper grid
     """
 
-    # Info bar height
-    info_bar_height = 40
-
-    # Draw info bar with buttons
-    pygame.draw.rect(screen, DARK_GRAY, (0, 0, WIDTH+GRID_SIZE, info_bar_height))
-
-    text_mines = font.render("Mines: " + str(NUM_MINES), True, BLACK)
-    screen.blit(text_mines, (10, 10))
-
-    text_time = font.render("Time: 0", True, BLACK)
-    screen.blit(text_time, (WIDTH - 100, 10))
-
-
-    text_reset = font.render("Reset", True, BLACK)
-    reset_rect = pygame.Rect(180, 5, 90, 30)
-    pygame.draw.rect(screen, WHITE, reset_rect)
-    pygame.draw.rect(screen, BLACK, reset_rect, 1)
-    screen.blit(text_reset, (190, 10))
-
-    text_hint = font.render("Hint", True, BLACK)
-    hint_rect = pygame.Rect(280, 5, 90, 30)
-    pygame.draw.rect(screen, WHITE, hint_rect)
-    pygame.draw.rect(screen, BLACK, hint_rect, 1)
-    screen.blit(text_hint, (290, 10))
-
-
-
     for row in range(ROWS):
         for col in range(COLS):
-            rect = pygame.Rect((col + 1) * GRID_SIZE, info_bar_height + (row + 1) * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+            rect = pygame.Rect((col + 1) * GRID_SIZE, (row + 1) * GRID_SIZE, GRID_SIZE, GRID_SIZE)
             if revealed[row][col]:
                 if grid[row][col] == -1:
                     pygame.draw.rect(screen, RED, rect)
@@ -67,23 +40,23 @@ def draw_grid(grid, revealed, flagged, screen, font, flag_font):
                     pygame.draw.rect(screen, BLACK, rect, 1)
                     if grid[row][col] > 0:
                         text = font.render(str(grid[row][col]), True, BLACK)
-                        screen.blit(text, ((col + 1) * GRID_SIZE + 10, info_bar_height + (row + 1) * GRID_SIZE + 5))
+                        screen.blit(text, ((col + 1) * GRID_SIZE + 10, (row + 1) * GRID_SIZE + 5))
             else:
                 pygame.draw.rect(screen, GRAY, rect)
                 pygame.draw.rect(screen, BLACK, rect, 1)
                 if flagged[row][col]:
                     flag_text = flag_font.render('F', True, BLUE)
-                    screen.blit(flag_text, ((col + 1) * GRID_SIZE + 10, info_bar_height + (row + 1) * GRID_SIZE + 5))
+                    screen.blit(flag_text, ((col + 1) * GRID_SIZE + 10, (row + 1) * GRID_SIZE + 5))
 
     # Draw row numbers
     for row in range(ROWS):
         row_text = font.render(str(row + 1), True, BLACK)
-        screen.blit(row_text, (10, info_bar_height + (row + 1) * GRID_SIZE + 10))
+        screen.blit(row_text, (10, (row + 1) * GRID_SIZE + 10))
 
     # Draw column numbers
     for col in range(COLS):
         col_text = font.render(str(col + 1), True, BLACK)
-        screen.blit(col_text, ((col + 1) * GRID_SIZE + 10, info_bar_height + 10))
+        screen.blit(col_text, ((col + 1) * GRID_SIZE + 10, 10))
 
 
 
@@ -149,8 +122,8 @@ def hint(hint_cache_board):
     """
     Send hint cache to minizinc
     """
-    for i in range(len(hint_cache_board[0])):
-        for j in range(len(hint_cache_board)):
+    for i in range(ROWS):
+        for j in range(COLS):
             if hint_cache_board[i][j] != 1:
                 continue
             minesweeper_model = Model("/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/superMSSolver/mine_not_possible.mzn")
@@ -162,10 +135,17 @@ def hint(hint_cache_board):
             instance['y'] = j+1
 
             result = instance.solve()
-            print(i+1,j+1,result)
-            # if not result["potential_mines"]:
-            #     print(i,j)
+            is_unsat = str(result.status) == "UNSATISFIABLE"
 
+            if is_unsat:
+                hint_cache_board[i][j] = -2
+                print("Mine not possible at: ", i+1, j+1)
+            else:
+                for x in range(len(result["potential_mines"])):
+                    for y in range(len(result["potential_mines"][0])):
+                        if result["potential_mines"][x][y] == 1:
+                            hint_cache_board[x][y] = -1
 
+    return hint_cache_board
 
 
