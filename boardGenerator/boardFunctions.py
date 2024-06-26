@@ -63,7 +63,7 @@ def saveForMinizinc(board, size, number_of_mines) -> None:
 		"""
 		Save the board to a data file for Minizinc to run
 		"""
-		with open("./superSaperSolver/data/data_gen.dzn", "w") as f:
+		with open("./superMSSolver/data/data_gen.dzn", "w") as f:
 				f.write("size = {};\n".format(size))
 				f.write("mines_count = {};\n".format(number_of_mines))
 				f.write("fields = array2d(1..size, 1..size, [")
@@ -71,6 +71,4 @@ def saveForMinizinc(board, size, number_of_mines) -> None:
 						for cell in row:
 								f.write(str(cell) + ",")
 				f.write("]);\n")
-				f.write("x = 0;\n")
-				f.write("y = 0;\n")
 		return None
