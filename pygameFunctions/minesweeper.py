@@ -1,3 +1,4 @@
+import numpy as np
 from minizinc import Instance, Model, Solver
 from gameConstants import *
 import pygame
@@ -24,7 +25,7 @@ def create_grid(size: int, number_of_mines: int, first_click: tuple) -> list:
     return board
 
 
-def draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board):
+def draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board, ROWS, COLS, GRID_SIZE):
     """
     Draw the minesweeper grid
     """
@@ -41,6 +42,8 @@ def draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board
                     if grid[row][col] > 0:
                         text = font.render(str(grid[row][col]), True, BLACK)
                         screen.blit(text, ((col + 1) * GRID_SIZE + 10, (row + 1) * GRID_SIZE + 5))
+            elif hint_cache_board[row][col] == -2:
+                pygame.draw.rect(screen, GREEN, rect)
             else:
                 pygame.draw.rect(screen, GRAY, rect)
                 pygame.draw.rect(screen, BLACK, rect, 1)
@@ -61,7 +64,7 @@ def draw_grid(grid, revealed, flagged, screen, font, flag_font, hint_cache_board
 
 
 
-def reveal_cell(grid, revealed, row, col, flagged):
+def reveal_cell(grid, revealed, row, col, flagged, ROWS, COLS):
     if revealed[row][col] or flagged[row][col]:
         return
     revealed[row][col] = True
@@ -69,22 +72,22 @@ def reveal_cell(grid, revealed, row, col, flagged):
         for r in range(max(0, row - 1), min(ROWS, row + 2)):
             for c in range(max(0, col - 1), min(COLS, col + 2)):
                 if not revealed[r][c]:
-                    reveal_cell(grid, revealed, r, c, flagged)
+                    reveal_cell(grid, revealed, r, c, flagged, ROWS, COLS)
 
-def check_win(revealed, grid):
+def check_win(revealed, grid, ROWS, COLS):
     for row in range(ROWS):
         for col in range(COLS):
             if grid[row][col] != -1 and not revealed[row][col]:
                 return False
     return True
 
-def game_over(grid, revealed):
+def game_over(grid, revealed, ROWS, COLS):
     for row in range(ROWS):
         for col in range(COLS):
             if grid[row][col] == -1:
                 revealed[row][col] = True
 
-def convert_to_save(grid, revealed, flagged):
+def convert_to_save(grid, revealed, flagged, ROWS, COLS):
     board = [[-1 for _ in range(COLS)] for _ in range(ROWS)]
     for row in range(ROWS):
         for col in range(COLS):
@@ -97,20 +100,26 @@ def convert_to_save(grid, revealed, flagged):
                 board[row][col] = -1
     return board
 
-def correct_hinted(board, hint_cache_board):
+def correct_hinted(board, hint_cache_board, flagged):
     """
     0 not neighbouring
     1 neighbouring
     2 revealed
     """
+    ROWS, COLS = len(board), len(board[0])  # Ensure ROWS and COLS are defined
+
     for i in range(ROWS):
         for j in range(COLS):
-            if hint_cache_board[i][j] not in [0,1]:
+            if hint_cache_board[i][j] not in [-1, 0, 1]:
+                continue
+
+            if flagged[i][j]:
+                hint_cache_board[i][j] = -1
                 continue
 
             for r in range(max(0, i - 1), min(ROWS, i + 2)):
                 for c in range(max(0, j - 1), min(COLS, j + 2)):
-                    if board[r][c] != -1 and r != i and c != j:
+                    if board[r][c] != -1 and (r != i or c != j):
                         hint_cache_board[i][j] = 1
 
             if board[i][j] != -1:
@@ -118,14 +127,17 @@ def correct_hinted(board, hint_cache_board):
 
     return hint_cache_board
 
-def hint(hint_cache_board):
+def hint(hint_cache_board, ROWS, COLS):
     """
     Send hint cache to minizinc
     """
+    temp_board = np.zeros((ROWS, COLS))
+
     for i in range(ROWS):
         for j in range(COLS):
-            if hint_cache_board[i][j] != 1:
+            if hint_cache_board[i][j] != 1 or temp_board[i,j] == 1:
                 continue
+
             minesweeper_model = Model("/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/superMSSolver/mine_not_possible.mzn")
             gecode = Solver.lookup("gecode")
 
@@ -141,10 +153,7 @@ def hint(hint_cache_board):
                 hint_cache_board[i][j] = -2
                 print("Mine not possible at: ", i+1, j+1)
             else:
-                for x in range(len(result["potential_mines"])):
-                    for y in range(len(result["potential_mines"][0])):
-                        if result["potential_mines"][x][y] == 1:
-                            hint_cache_board[x][y] = -1
+                temp_board = np.logical_or(temp_board, np.array(result['potential_mines']))
 
     return hint_cache_board
 

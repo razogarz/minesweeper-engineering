@@ -59,10 +59,4 @@ constraint forall (i, j in 1..size) (
 
 solve satisfy;
 
-% output
-% [
-%   if j == 1 then "\n" else " " endif ++
-%   show(potential_board[i,j])
-%   | i, j in 1..size
-% ];
 output["x = ", show(x), " y = ", show(y)];
