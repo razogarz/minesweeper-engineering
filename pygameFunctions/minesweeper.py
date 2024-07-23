@@ -68,6 +68,7 @@ def reveal_cell(grid, revealed, row, col, flagged, ROWS, COLS):
     if revealed[row][col] or flagged[row][col]:
         return
     revealed[row][col] = True
+
     if grid[row][col] == 0:
         for r in range(max(0, row - 1), min(ROWS, row + 2)):
             for c in range(max(0, col - 1), min(COLS, col + 2)):
@@ -81,6 +82,13 @@ def check_win(revealed, grid, ROWS, COLS):
                 return False
     return True
 
+def is_game_over(grid, revealed, ROWS, COLS)->bool:
+    for row in range(ROWS):
+        for col in range(COLS):
+            if grid[row][col] == -1 and revealed[row][col]:
+                return True
+    return False
+
 def game_over(grid, revealed, ROWS, COLS):
     for row in range(ROWS):
         for col in range(COLS):
@@ -88,6 +96,7 @@ def game_over(grid, revealed, ROWS, COLS):
                 revealed[row][col] = True
 
 def convert_to_save(grid, revealed, flagged, ROWS, COLS):
+
     board = [[-1 for _ in range(COLS)] for _ in range(ROWS)]
     for row in range(ROWS):
         for col in range(COLS):
@@ -131,6 +140,7 @@ def hint(hint_cache_board, ROWS, COLS):
     """
     Send hint cache to minizinc
     """
+    print("Hinting")
     temp_board = np.zeros((ROWS, COLS))
 
     for i in range(ROWS):
@@ -156,5 +166,31 @@ def hint(hint_cache_board, ROWS, COLS):
                 temp_board = np.logical_or(temp_board, np.array(result['potential_mines']))
 
     return hint_cache_board
+
+def save_grid(grid, difficulty, row, col):
+    """
+    Safe the grid
+    """
+    with open(f'./superMSSolver/generatedNoGuesser/{difficulty}/data_gen_r{row}_c{col}.csv', "w") as f:
+        for row in grid:
+            for cell in row:
+                f.write(str(cell) + ",")
+            f.write("\n")
+    return None
+
+def load_grid(difficulty, row, col):
+    """
+    Load the grid
+    """
+    print(difficulty, row, col)
+    with open(f'./superMSSolver/generatedNoGuesser/{difficulty}/data_gen_r{row}_c{col}.csv', "r") as f:
+        grid = []
+        for line in f:
+            grid.append([int(cell) for cell in line.split(",")[:-1]])
+
+        print(grid)
+    return grid
+
+
 
 

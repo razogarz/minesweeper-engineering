@@ -19,7 +19,7 @@ def main():
 		print("\n")
 		draw_ascii_board(covered_board)
 		print(covered_board)
-		saveForMinizinc(covered_board, size, number_of_mines)
+		save_for_minizinc(covered_board, size, number_of_mines)
 
 
 if __name__ == "__main__":

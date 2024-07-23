@@ -59,7 +59,7 @@ def uncoverFields(current_board, full_board, x, y) -> list:
 										uncoverFields(current_board, full_board, x + dx, y + dy)
 				return current_board
 
-def saveForMinizinc(board, size, number_of_mines) -> None:
+def save_for_minizinc(board, size, number_of_mines) -> None:
 		"""
 		Save the board to a data file for Minizinc to run
 		"""

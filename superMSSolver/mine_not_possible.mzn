@@ -18,8 +18,8 @@ array[1..size, 1..size] of var bool: potential_mines;
 
 
 % CLICK ON BOARD
-constraint x >= 0 /\ x < size;
-constraint y >= 0 /\ y < size;
+constraint x > 0 /\ x <= size;
+constraint y > 0 /\ y <= size;
 
 % FIELD IS UNKNOWN
 constraint fields[x,y] == -1;
