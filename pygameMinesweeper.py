@@ -1,7 +1,14 @@
-from boardGenerator.boardFunctions import save_for_minizinc
+from minizincFunctions.convertToSave import convert_to_save
+from minizincFunctions.correctHintedBoard import correct_hinted_board
+from minizincFunctions.hintSafeFields import hint_safe_fields
+from minizincFunctions.saveForMinizinc import save_for_minizinc
 from gameConstants import GRAY
-from pygameFunctions.minesweeper import game_over, check_win, reveal_cell, convert_to_save, create_grid, correct_hinted, \
-    hint, draw_grid, load_grid
+from pygameFunctions.drawGrid import draw_grid
+from boardFunctions.generateMineField import generate_mine_field
+from boardFunctions.loadGridFromFile import load_grid_from_file
+from boardFunctions.handleFieldClick import handle_field_click
+from boardFunctions.checkWin import check_win
+from boardFunctions.gameOverRevealBombs import game_over_reveal_bombs
 
 
 def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame, from_file=False, diff=None):
@@ -41,15 +48,16 @@ def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, py
                 row, col = (y // GRID_SIZE) - 1, (x // GRID_SIZE) - 1
 
                 # ---------------- FIRST CLICK ----------------
+
                 if first_click:
                     first_click = False
                     if not from_file:
                         while True:
-                            grid = create_grid(ROWS, NUM_MINES, (row, col))
+                            grid = generate_mine_field(ROWS, COLS, NUM_MINES, (row, col))
                             if grid[row][col] == 0:
                                 break
                     else:
-                        grid = load_grid(diff, row, col)
+                        grid = load_grid_from_file(diff, row, col)
                         # while True:
                         #     grid = create_grid(ROWS, NUM_MINES, (row, col))
                         #     if grid[row][col] == 0:
@@ -57,21 +65,29 @@ def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, py
 
                 # ---------------- LEFT CLICK ----------------
                 if event.button == 1 or event.button == 2:  # left click or scroll click
+                    if flagged[row][col]:
+                        continue
+
                     if grid[row][col] == -1:
                         game_over_flag = True
-                        game_over(grid, revealed, ROWS, COLS)
+                        game_over_reveal_bombs(grid, revealed, ROWS, COLS)
                     else:
-                        reveal_cell(grid, revealed, row, col, flagged, ROWS, COLS)
+                        handle_field_click(grid, revealed, row, col, flagged, ROWS, COLS)
                         if check_win(revealed, grid, ROWS, COLS):
                             print("You win!")
                             running = False
                         else:
                             board_to_save = convert_to_save(grid, revealed, flagged, ROWS, COLS)
                             # draw_ascii_board(board_to_save)
-                            save_for_minizinc(board_to_save, ROWS, NUM_MINES)
-                            hint_cache_board = correct_hinted(board_to_save, hint_cache_board, flagged)
+                            not_mines = [[0]*COLS for _ in range(ROWS)]
+                            for i in range(ROWS):
+                                for j in range(COLS):
+                                    if hint_cache_board[i][j] == -2:
+                                        not_mines[i][j] = 1
+                            save_for_minizinc(board_to_save, ROWS, COLS, NUM_MINES, not_mines)
+                            hint_cache_board = correct_hinted_board(board_to_save, hint_cache_board, flagged)
                             if event.button == 2:
-                                hint_cache_board = hint(hint_cache_board, ROWS, COLS)
+                                hint_cache_board = hint_safe_fields(hint_cache_board, ROWS, COLS)
 
                 # ---------------- RIGHT CLICK ----------------
                 if event.button == 3:
