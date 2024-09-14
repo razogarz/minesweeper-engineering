@@ -3,7 +3,7 @@ import sys
 import pygame
 
 import gameConstants
-from generateNoGuessingBoard import generate_solvable_board
+from generateSolvableBoard import generate_solvable_board
 from pygameMinesweeper import play_game
 import time
 

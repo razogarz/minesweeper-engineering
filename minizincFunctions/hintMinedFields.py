@@ -1,7 +1,7 @@
 import numpy as np
 from minizinc import Instance, Model, Solver
 
-def hint_mined_fields(hint_cache_board, ROWS, COLS):
+def hint_mined_fields(hint_cache_board, ROWS, COLS, flagged):
     """
     Check where mines HAS TO BE and flag fields
     TODO: Implement this function
@@ -15,7 +15,7 @@ def hint_mined_fields(hint_cache_board, ROWS, COLS):
                 continue
 
             minesweeper_model = Model(
-                "/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/mine_not_possible_UNSAT.mzn")
+                "/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/mine_must_be_UNSAT.mzn")
             gecode = Solver.lookup("gecode")
 
             minesweeper_model.add_file(
@@ -29,7 +29,8 @@ def hint_mined_fields(hint_cache_board, ROWS, COLS):
             is_unsat = str(result.status) == "UNSATISFIABLE"
 
             if is_unsat:
-                hint_cache_board[i][j] = -2
+                hint_cache_board[i][j] = -3
+                flagged[i][j] = True
                 print("Mine not possible at: ", i + 1, j + 1)
             else:
                 print(result.statistics)

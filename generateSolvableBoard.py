@@ -24,6 +24,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
     possible_moves = []
 
     '''
+        hint_cache_board[x,y] = -3 - mine
         hint_cache_board[x,y] = -2 - not mine
         hint_cache_board[x,y] = -1 - possible mine
         hint_cache_board[x,y] = 0 - not revealed, not neighbour of revealed
@@ -84,7 +85,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
             if not possible_moves:
                 print("No possible moves")
                 # 2. HINT WHERE MINES HAVE TO BE
-                hint_cache_board = hint_mined_fields(hint_cache_board, ROWS, COLS)
+                hint_cache_board = hint_mined_fields(hint_cache_board, ROWS, COLS, flagged)
                 # 3. FLAG THE MINES
                 hint_cache_board = correct_hinted_board(board_to_save, hint_cache_board, flagged)
                 # 4. LOOK FOR MOVES ONCE AGAIN
