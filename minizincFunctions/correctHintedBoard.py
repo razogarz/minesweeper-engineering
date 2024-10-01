@@ -7,7 +7,6 @@ def correct_hinted_board(board, hint_cache_board, flagged_fields):
         hint_cache_board[x,y] = 2 - revealed
     """
     ROWS, COLS = len(board), len(board[0])  # Ensure ROWS and COLS are defined
-    print("CORRECT")
     for i in range(ROWS):
         for j in range(COLS):
             if hint_cache_board[i][j] not in [-1, 0, 1]:

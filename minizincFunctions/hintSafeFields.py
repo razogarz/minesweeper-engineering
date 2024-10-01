@@ -7,13 +7,16 @@ def hint_safe_fields(hint_cache_board, ROWS, COLS):
     """
     print("Hinting")
     temp_board = np.zeros((ROWS, COLS))
+    hint = 0
+    tree_depth = 0
 
     for i in range(ROWS):
         for j in range(COLS):
             if hint_cache_board[i][j] != 1 or temp_board[i,j] == True:
                 continue
 
-            minesweeper_model = Model("/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/mine_not_possible_UNSAT.mzn")
+            hint += 1
+            minesweeper_model = Model("/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/field_is_safe.mzn")
             gecode = Solver.lookup("gecode")
 
             minesweeper_model.add_file("/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/data/data_gen.dzn", parse_data=True)
@@ -28,7 +31,8 @@ def hint_safe_fields(hint_cache_board, ROWS, COLS):
                 hint_cache_board[i][j] = -2
                 print("Mine not possible at: ", i+1, j+1)
             else:
-                print(result.statistics)
                 temp_board = np.logical_or(temp_board, np.array(result['potential_mines']))
 
-    return hint_cache_board
+            tree_depth += result.statistics['peakDepth']
+
+    return hint_cache_board, tree_depth, hint

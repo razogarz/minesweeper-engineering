@@ -7,30 +7,49 @@ from generateSolvableBoard import generate_solvable_board
 from pygameMinesweeper import play_game
 import time
 
+from smartGen import smart_generate_board
+
 # ----------------- PYGAME SETUP -----------------
 pygame.init()
 
 def main(args=None):
+    global num_cols_arg, num_rows_arg, num_mines_arg, difficulty_arg, game_mode_arg
     if args is None:
         args = sys.argv[1:]  # Skip the script name
 
+    difficulty_arg = args[0]
+    game_mode_arg = args[1]
+
+    if game_mode_arg == "custom":
+        if len(args) != 5:
+            print("Invalid number of arguments")
+            return
+        if not args[2].isdigit() or not args[3].isdigit() or not args[4].isdigit():
+            print("Invalid arguments")
+            return
+
+        num_rows_arg = int(args[2])
+        num_cols_arg = int(args[3])
+        num_mines_arg = int(args[4])
+
+
     # ----------------- GAME VARIABLES -----------------
-    if args[0] == "easy":
+    if difficulty_arg == "easy":
         NUM_OF_ROWS = 10
         NUM_OF_COLS = 10
         NUM_MINES = 15
-    elif args[0] == "medium":
+    elif difficulty_arg == "medium":
         NUM_OF_ROWS = 16
         NUM_OF_COLS = 16
         NUM_MINES = 40
-    elif args[0] == "hard":
+    elif difficulty_arg == "hard":
         NUM_OF_ROWS = 16
         NUM_OF_COLS = 30
         NUM_MINES = 99
-    elif args[0] == "custom":
-        NUM_OF_ROWS = int(args[2])
-        NUM_OF_COLS = int(args[3])
-        NUM_MINES = int(args[4])
+    elif difficulty_arg == "custom":
+        NUM_OF_ROWS = num_rows_arg
+        NUM_OF_COLS = num_cols_arg
+        NUM_MINES = num_mines_arg
     else:
         print("Invalid difficulty")
         return
@@ -54,9 +73,9 @@ def main(args=None):
     font = pygame.font.SysFont(None, 40)
     flag_font = pygame.font.SysFont(None, 40)
 
-    if args[1] == "play":
+    if game_mode_arg == "play":
         play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame)
-    elif args[1] == "generate":
+    elif game_mode_arg == "generate":
         print("gen")
         pygame.quit()
         start = time.time()
@@ -64,8 +83,15 @@ def main(args=None):
         end = time.time()
         time_passed = end - start
         print(f'Time taken: {int(time_passed / 3600)}h {int(time_passed / 60)}m {int(time_passed % 60)}s')
-    elif args[1] == "fromfile":
+    elif game_mode_arg == "fromfile":
         play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame, from_file = True, diff=args[0])
+    elif game_mode_arg == "smartgen":
+        pygame.quit()
+        start = time.time()
+        smart_generate_board(ROWS, COLS, NUM_MINES, args[0])
+        end = time.time()
+        time_passed = end - start
+        print(f'Time taken: {int(time_passed / 3600)}h {int(time_passed / 60)}m {int(time_passed % 60)}s')
     else:
         print("Invalid mode")
         return

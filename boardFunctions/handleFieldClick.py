@@ -1,6 +1,7 @@
 def handle_field_click(grid, revealed_fields, row, col, flagged, ROWS, COLS):
     if revealed_fields[row][col] or flagged[row][col]:
         return
+
     revealed_fields[row][col] = True
 
     if grid[row][col] == 0:

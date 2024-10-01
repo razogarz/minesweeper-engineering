@@ -87,7 +87,7 @@ def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, py
                             save_for_minizinc(board_to_save, ROWS, COLS, NUM_MINES, not_mines)
                             hint_cache_board = correct_hinted_board(board_to_save, hint_cache_board, flagged)
                             if event.button == 2:
-                                hint_cache_board = hint_safe_fields(hint_cache_board, ROWS, COLS)
+                                hint_cache_board = hint_safe_fields(hint_cache_board, ROWS, COLS)[0]
 
                 # ---------------- RIGHT CLICK ----------------
                 if event.button == 3:

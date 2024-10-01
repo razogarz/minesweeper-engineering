@@ -15,7 +15,7 @@ def hint_mined_fields(hint_cache_board, ROWS, COLS, flagged):
                 continue
 
             minesweeper_model = Model(
-                "/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/mine_must_be_UNSAT.mzn")
+                "/mnt/c/Users/Razogarz/PycharmProjects/minesweeper-engineering/minizincModels/field_is_mined.mzn")
             gecode = Solver.lookup("gecode")
 
             minesweeper_model.add_file(
@@ -31,7 +31,7 @@ def hint_mined_fields(hint_cache_board, ROWS, COLS, flagged):
             if is_unsat:
                 hint_cache_board[i][j] = -3
                 flagged[i][j] = True
-                print("Mine not possible at: ", i + 1, j + 1)
+                print("Mine has to be at: ", i + 1, j + 1)
             else:
                 print(result.statistics)
                 temp_board = np.logical_or(temp_board, np.array(result['potential_mines']))
