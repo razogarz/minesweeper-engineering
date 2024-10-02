@@ -11,7 +11,7 @@ from boardFunctions.checkWin import check_win
 from boardFunctions.gameOverRevealBombs import game_over_reveal_bombs
 
 
-def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame, from_file=False, diff=None):
+def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame, from_file=False, diff=None, grid_arg=None):
     first_click = True
     grid = None
     running = True
@@ -51,17 +51,16 @@ def play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, py
 
                 if first_click:
                     first_click = False
-                    if not from_file:
+                    if from_file:
+                        grid = load_grid_from_file(diff, row, col)
+                    elif grid_arg:
+                        grid = grid_arg
+                    else:
                         while True:
                             grid = generate_mine_field(ROWS, COLS, NUM_MINES, (row, col))
                             if grid[row][col] == 0:
                                 break
-                    else:
-                        grid = load_grid_from_file(diff, row, col)
-                        # while True:
-                        #     grid = create_grid(ROWS, NUM_MINES, (row, col))
-                        #     if grid[row][col] == 0:
-                        #         break
+
 
                 # ---------------- LEFT CLICK ----------------
                 if event.button == 1 or event.button == 2:  # left click or scroll click

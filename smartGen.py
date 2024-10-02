@@ -1,7 +1,7 @@
-import random
 import time
 
-from boardFunctions.checkLose import check_lose
+from boardFunctions.addOuterLayer import add_outer_layer
+from boardFunctions.saveGridToFile import save_grid_to_file
 from gameConstants import FieldState
 from minizincFunctions.convertToSave import convert_to_save
 from minizincFunctions.correctHintedBoard import correct_hinted_board
@@ -72,6 +72,10 @@ def smart_generate_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
             # save_grid_to_file(grid, difficulty, original_x, original_y)
             con = input("Continue? (y/n): ")
             if con == "n":
+                is_to_save = input("Save? (y/n): ")
+                if is_to_save == "y":
+                    save_grid_to_file(grid, difficulty, original_x, original_y, named=True)
+
                 return True
 
             prev_grid = grid
@@ -100,7 +104,6 @@ def smart_generate_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
                     if hint_cache_board[i][j] == FieldState.NOT_MINED.value and not revealed[i][j]:
                         possible_moves.append((i, j))
 
-            print("Possible moves HERE: ", possible_moves)
             if not possible_moves:
                 print("No possible moves")
                 # 2. HINT WHERE MINES HAVE TO BE
@@ -136,35 +139,6 @@ def smart_generate_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
 
     return False
 
-def add_outer_layer(grid: list, click: tuple, mines: int) -> list:
-    mine_density = mines / (len(grid) * len(grid[0]))
-    new_mine_count = int(mine_density * (len(grid) + 2) * (len(grid[0]) + 2))
-    current_mine_count = mines
-
-    new_grid = [[0 for _ in range(len(grid[0]) + 2)] for _ in range(len(grid) + 2)]
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
-            new_grid[i + 1][j + 1] = grid[i][j]
-
-    while current_mine_count < new_mine_count:
-        x = random.randint(0, len(grid) + 1)
-        y = random.randint(1, len(grid[0]) + 1)
-        if (x,y) != click and new_grid[x][y] != -1 and (x == 0 or x == len(grid) + 1 or y == 0 or y == len(grid[0]) + 1):
-            new_grid[x][y] = -1
-            current_mine_count += 1
-
-        for r in range(len(grid) + 2):
-            for c in range(len(grid[0]) + 2):
-                if new_grid[r][c] == -1:
-                    continue
-                num = 0
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        if 0 <= r + dx < len(grid) + 2 and 0 <= c + dy < len(grid[0]) + 2 and new_grid[r + dx][c + dy] == -1:
-                            num += 1
-                new_grid[r][c] = num
-    draw_ascii_board(new_grid)
-    return [new_grid, new_mine_count]
 
 def handle_first_click(
         ROWS: int, COLS: int, NUM_MINES: int, original_x: int, original_y: int, revealed: list, flagged: list,

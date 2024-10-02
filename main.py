@@ -3,6 +3,7 @@ import sys
 import pygame
 
 import gameConstants
+from boardFunctions.loadGridFromFile import load_grid_from_file
 from generateSolvableBoard import generate_solvable_board
 from pygameMinesweeper import play_game
 import time
@@ -13,7 +14,7 @@ from smartGen import smart_generate_board
 pygame.init()
 
 def main(args=None):
-    global num_cols_arg, num_rows_arg, num_mines_arg, difficulty_arg, game_mode_arg
+    global num_cols_arg, num_rows_arg, num_mines_arg, difficulty_arg, game_mode_arg, grid_from_file
     if args is None:
         args = sys.argv[1:]  # Skip the script name
 
@@ -47,9 +48,13 @@ def main(args=None):
         NUM_OF_COLS = 30
         NUM_MINES = 99
     elif difficulty_arg == "custom":
-        NUM_OF_ROWS = num_rows_arg
-        NUM_OF_COLS = num_cols_arg
-        NUM_MINES = num_mines_arg
+        grid_from_file = load_grid_from_file("custom", 0, 0, named=True)
+        NUM_OF_ROWS = len(grid_from_file)
+        NUM_OF_COLS = len(grid_from_file[0])
+        NUM_MINES = 0
+        for row in grid_from_file:
+            NUM_MINES += row.count(-1)
+
     else:
         print("Invalid difficulty")
         return
@@ -74,7 +79,10 @@ def main(args=None):
     flag_font = pygame.font.SysFont(None, 40)
 
     if game_mode_arg == "play":
-        play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame)
+        if difficulty_arg == "custom":
+            play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame, grid_arg=grid_from_file)
+        else:
+            play_game(COLS, ROWS, NUM_MINES, GRID_SIZE, screen, font, flag_font, sys, pygame)
     elif game_mode_arg == "generate":
         print("gen")
         pygame.quit()
