@@ -4,7 +4,6 @@ from minizinc import Instance, Model, Solver
 def hint_mined_fields(hint_cache_board, ROWS, COLS, flagged):
     """
     Check where mines HAS TO BE and flag fields
-    TODO: Implement this function
     """
     print("Hinting")
     temp_board = np.zeros((ROWS, COLS))

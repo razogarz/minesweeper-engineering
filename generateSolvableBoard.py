@@ -1,4 +1,5 @@
 from boardFunctions.checkLose import check_lose
+from gameConstants import FieldState
 from minizincFunctions.convertToSave import convert_to_save
 from minizincFunctions.correctHintedBoard import correct_hinted_board
 from minizincFunctions.hintMinedFields import hint_mined_fields
@@ -22,6 +23,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
     revealed = [[False for _ in range(COLS)] for _ in range(ROWS)]
     flagged = [[False for _ in range(COLS)] for _ in range(ROWS)]
     possible_moves = []
+    empty_fields = []
 
     '''
         hint_cache_board[x,y] = -3 - mine
@@ -35,8 +37,6 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
 
     original_x = int(input("Enter x coordinate: "))
     original_y = int(input("Enter y coordinate: "))
-
-    empty_fields = []
 
     sum_of_hints = 0
     sum_of_tree_depth = 0
@@ -52,6 +52,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
                 grid = generate_mine_field(ROWS, COLS, NUM_MINES, (original_x, original_y))
                 if grid[original_x][original_y] == 0:
                     break
+            draw_ascii_board(grid)
             handle_field_click(grid, revealed, original_x, original_y, flagged, ROWS, COLS)
 
             # Save the empty fields
@@ -69,12 +70,12 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
             draw_ascii_board(grid)
             save_grid_to_file(grid, difficulty, original_x, original_y)
             return True
-        elif not check_lose(grid, revealed, ROWS, COLS):
+        else:
             board_to_save = convert_to_save(grid, revealed, flagged, ROWS, COLS)
             not_mines = [[0] * COLS for _ in range(ROWS)]
             for i in range(ROWS):
                 for j in range(COLS):
-                    if hint_cache_board[i][j] == -2:
+                    if hint_cache_board[i][j] == FieldState.NOT_MINED.value:
                         not_mines[i][j] = 1
             save_for_minizinc(board_to_save, ROWS, COLS, NUM_MINES, not_mines)
             hint_cache_board = correct_hinted_board(board_to_save, hint_cache_board, flagged)
@@ -84,7 +85,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
 
             for i in range(ROWS):
                 for j in range(COLS):
-                    if hint_cache_board[i][j] == -2 and not revealed[i][j]:
+                    if hint_cache_board[i][j] == FieldState.NOT_MINED.value and not revealed[i][j]:
                         possible_moves.append((i, j))  # Use tuple instead of list for consistency
 
             print("Possible moves: ", possible_moves)
@@ -105,6 +106,7 @@ def generate_solvable_board(ROWS, COLS, NUM_MINES, difficulty) -> bool:
                             sum_of_hints += num_of_hints
                 if not possible_moves:
                     game_over_flag = True
+                game_over_flag = True
 
         if game_over_flag:
             print("Restarting")

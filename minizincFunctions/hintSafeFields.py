@@ -1,5 +1,6 @@
 import numpy as np
 from minizinc import Instance, Model, Solver
+from gameConstants import FieldState
 
 def hint_safe_fields(hint_cache_board, ROWS, COLS):
     """
@@ -12,7 +13,7 @@ def hint_safe_fields(hint_cache_board, ROWS, COLS):
 
     for i in range(ROWS):
         for j in range(COLS):
-            if hint_cache_board[i][j] != 1 or temp_board[i,j] == True:
+            if hint_cache_board[i][j] != FieldState.NOT_REVEALED_NEIGHBOUR.value or temp_board[i,j] == True:
                 continue
 
             hint += 1
@@ -28,7 +29,7 @@ def hint_safe_fields(hint_cache_board, ROWS, COLS):
             is_unsat = str(result.status) == "UNSATISFIABLE"
 
             if is_unsat:
-                hint_cache_board[i][j] = -2
+                hint_cache_board[i][j] = FieldState.NOT_MINED.value
                 print("Mine not possible at: ", i+1, j+1)
             else:
                 temp_board = np.logical_or(temp_board, np.array(result['potential_mines']))
